@@ -2,4 +2,4 @@ openai
 Pillow  # This is the package name for PIL
 langchain  
 PyMuPDF 
-tempfile  
+
