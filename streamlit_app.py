@@ -184,6 +184,7 @@ elif app_mode == "Due Diligence Meta":
                 st.markdown(message["content"])
     
     if len(st.session_state.dmessages) >= 19:
+        st.info("You can now generate the due diligence report.")
         if st.button("Generate Report"):
             st.session_state.dmessages.append({"role": "user", "content": REPORT_PROMPT})
             with st.chat_message("assistant"):
@@ -232,6 +233,7 @@ elif app_mode == "Due Diligence LG":
                 st.markdown(message["content"])
     
     if len(st.session_state.dmessages) >= 19:
+        st.info("You can now generate the due diligence report.")
         if st.button("Generate Report"):
             st.session_state.dmessages.append({"role": "user", "content": REPORT_PROMPT})
             with st.chat_message("assistant"):
