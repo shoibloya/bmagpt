@@ -72,9 +72,24 @@ def image_to_base64(image):
     image.save(buffered, format="JPEG")
     return base64.b64encode(buffered.getvalue()).decode()
 
+def generate_report(client, conversation):
+    # This function simulates generating a report based on the conversation.
+    # Replace this with your actual implementation using the OpenAI API or any other model.
+    # Example:
+    response = client.completions.create(
+        model="text-davinci-003",  # Use an appropriate model
+        prompt=conversation,
+        temperature=0.7,
+        max_tokens=1024,
+        top_p=1.0,
+        frequency_penalty=0.0,
+        presence_penalty=0.0
+    )
+    return response.choices[0].text 
+
 
 # Sidebar navigation
-app_mode = st.sidebar.selectbox('Choose the app mode', ['Chat', 'PDF'])
+app_mode = st.sidebar.selectbox('Choose the app mode', ['Chat', 'PDF', 'Due Diligence Meta', 'Due Diligence LG'])
 
 if app_mode == "Chat":
     # Main app layout
@@ -151,3 +166,99 @@ elif app_mode == "PDF":
 
     if len(result):
         st.info(response)
+
+elif app_mode == "Due Diligence Meta":
+
+    REPORT_PROMPT = "Create the due diligence report. In your report include the following sections\nReport: The information you have gathered from the user in string format. Present it with the relevant subsections.\nFeedback: Feedback to the team based on the information you gathered in string format.\nFinal Decision: Your final decision on whether this is a feasible idea worth the investment in string format."
+    st.title("Due Diligence Meta")
+
+    if "openai_model" not in st.session_state:
+        st.session_state["openai_model"] = "gpt-4-0125-preview"
+
+    if "dmessages" not in st.session_state:
+        st.session_state.dmessages = [{"role": "system", "content": "You are a virtual due diligence expert for Meta previously known as facebook. Your task is to gather detailed information about users' new business ideas without revealing the structure or sections of the report. Engage users in a conversational manner, asking one question at a time to ensure clarity. Keep your questions short and to the point. Start by asking them to describe their business opportunity and their rationale on why the company should invest in their business idea. Continue the conversation to gather information on key due diligence findings, assumptions and risks, project overview, market opportunity, strategic alignment, competitive landscape, available resources, technical and business execution feasibility, and the main investment thesis."}]
+    
+    for message in st.session_state.dmessages:
+        if message["role"] != "system" and message["content"] != REPORT_PROMPT:
+            with st.chat_message(message["role"]):
+                st.markdown(message["content"])
+    
+    if len(st.session_state.dmessages) >= 19:
+        if st.button("Generate Report"):
+            st.session_state.dmessages.append({"role": "user", "content": REPORT_PROMPT})
+            with st.chat_message("assistant"):
+                stream = client.chat.completions.create(
+                    model=st.session_state["openai_model"],
+                    messages=[
+                        {"role": m["role"], "content": m["content"]}
+                        for m in st.session_state.dmessages
+                    ],
+                    stream=True,
+                )
+                response = st.write_stream(stream)
+            st.session_state.dmessages.append({"role": "assistant", "content": response})
+
+    if prompt := st.chat_input("What is up?"):
+        st.session_state.dmessages.append({"role": "user", "content": prompt})
+        with st.chat_message("user"):
+            st.markdown(prompt)
+
+        with st.chat_message("assistant"):
+            stream = client.chat.completions.create(
+                model=st.session_state["openai_model"],
+                messages=[
+                    {"role": m["role"], "content": m["content"]}
+                    for m in st.session_state.dmessages
+                ],
+                stream=True,
+            )
+            response = st.write_stream(stream)
+        st.session_state.dmessages.append({"role": "assistant", "content": response})
+
+elif app_mode == "Due Diligence LG":
+
+    REPORT_PROMPT = "Create the due diligence report. In your report include the following sections\nReport: The information you have gathered from the user in string format. Present it with the relevant subsections.\nFeedback: Feedback to the team based on the information you gathered in string format.\nFinal Decision: Your final decision on whether this is a feasible idea worth the investment in string format."
+    st.title("Due Diligence LG")
+
+    if "openai_model" not in st.session_state:
+        st.session_state["openai_model"] = "gpt-4-0125-preview"
+
+    if "dmessages" not in st.session_state:
+        st.session_state.dmessages = [{"role": "system", "content": "You are a virtual due diligence expert for LG (the korean company) with a focus on sustainability. Your task is to gather detailed information about users' new business ideas without revealing the structure or sections of the report. Engage users in a conversational manner, asking one question at a time to ensure clarity. Keep your questions short and to the point. Start by asking them to describe their business opportunity and their rationale on why the company should invest in their business idea. Continue the conversation to gather information on key due diligence findings, assumptions and risks, project overview, market opportunity, strategic alignment, competitive landscape, available resources, technical and business execution feasibility, and the main investment thesis."}]
+    
+    for message in st.session_state.dmessages:
+        if message["role"] != "system" and message["content"] != REPORT_PROMPT:
+            with st.chat_message(message["role"]):
+                st.markdown(message["content"])
+    
+    if len(st.session_state.dmessages) >= 19:
+        if st.button("Generate Report"):
+            st.session_state.dmessages.append({"role": "user", "content": REPORT_PROMPT})
+            with st.chat_message("assistant"):
+                stream = client.chat.completions.create(
+                    model=st.session_state["openai_model"],
+                    messages=[
+                        {"role": m["role"], "content": m["content"]}
+                        for m in st.session_state.dmessages
+                    ],
+                    stream=True,
+                )
+                response = st.write_stream(stream)
+            st.session_state.dmessages.append({"role": "assistant", "content": response})
+
+    if prompt := st.chat_input("What is up?"):
+        st.session_state.dmessages.append({"role": "user", "content": prompt})
+        with st.chat_message("user"):
+            st.markdown(prompt)
+
+        with st.chat_message("assistant"):
+            stream = client.chat.completions.create(
+                model=st.session_state["openai_model"],
+                messages=[
+                    {"role": m["role"], "content": m["content"]}
+                    for m in st.session_state.dmessages
+                ],
+                stream=True,
+            )
+            response = st.write_stream(stream)
+        st.session_state.dmessages.append({"role": "assistant", "content": response})
