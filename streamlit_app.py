@@ -233,7 +233,7 @@ elif app_mode == "Due Diligence LG":
                 st.markdown(message["content"])
     
     if len(st.session_state.dmessages) >= 19:
-        st.success('This is a success message!', icon="✅")
+        st.warning('This is a warning', icon="⚠️")
         if st.button("Generate Report"):
             st.session_state.dmessages.append({"role": "user", "content": REPORT_PROMPT})
             with st.chat_message("assistant"):
