@@ -183,7 +183,7 @@ elif app_mode == "Due Diligence Meta":
             with st.chat_message(message["role"]):
                 st.markdown(message["content"])
     
-    if len(st.session_state.dmessages) >= 4:
+    if len(st.session_state.dmessages) >= 19:
         st.toast('You can now generate the due diligence report.')
         if st.button("Generate Report"):
             st.session_state.dmessages.append({"role": "user", "content": REPORT_PROMPT})
