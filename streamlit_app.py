@@ -232,8 +232,8 @@ elif app_mode == "Due Diligence LG":
             with st.chat_message(message["role"]):
                 st.markdown(message["content"])
     
-    if len(st.session_state.dmessages) >= 19:
-        st.info("You can now generate the due diligence report.")
+    if len(st.session_state.dmessages) >= 2:
+        st.toast('Your edited image was saved!', icon='😍')
         if st.button("Generate Report"):
             st.session_state.dmessages.append({"role": "user", "content": REPORT_PROMPT})
             with st.chat_message("assistant"):
