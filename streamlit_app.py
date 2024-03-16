@@ -169,7 +169,7 @@ elif app_mode == "PDF":
 
 elif app_mode == "Due Diligence Meta":
 
-    REPORT_PROMPT = "Create the due diligence report. In your report include the following sections\nReport: The information you have gathered from the user in string format. Present it with the relevant subsections.\nFeedback: Feedback to the team based on the information you gathered in string format.\nFinal Decision: Your final decision on whether this is a feasible idea worth the investment in string format."
+    REPORT_PROMPT = "Create the detailed due diligence report. In your report include the following sections\nReport: The information you have gathered from the user in string format. Present it with the relevant subsections. Also, include a section on how the idea can be improved or additional points of consideration.\nFeedback: Feedback to the team based on the information you gathered in string format.\nFinal Decision: Your final decision on whether this is a feasible idea worth the investment in string format."
     st.title("Due Diligence Meta")
 
     if "openai_model" not in st.session_state:
@@ -218,7 +218,7 @@ elif app_mode == "Due Diligence Meta":
 
 elif app_mode == "Due Diligence LG":
 
-    REPORT_PROMPT = "Create the due diligence report. In your report include the following sections\nReport: The information you have gathered from the user in string format. Present it with the relevant subsections.\nFeedback: Feedback to the team based on the information you gathered in string format.\nFinal Decision: Your final decision on whether this is a feasible idea worth the investment in string format."
+    REPORT_PROMPT = "Create the detailed due diligence report. In your report include the following sections\nReport: The information you have gathered from the user in string format. Present it with the relevant subsections. Also, include a section on how the idea can be improved or additional points of consideration.\nFeedback: Feedback to the team based on the information you gathered in string format.\nFinal Decision: Your final decision on whether this is a feasible idea worth the investment in string format."
     st.title("Due Diligence LG")
 
     if "openai_model" not in st.session_state:
