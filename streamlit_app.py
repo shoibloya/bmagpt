@@ -224,32 +224,32 @@ elif app_mode == "Due Diligence LG":
     if "openai_model" not in st.session_state:
         st.session_state["openai_model"] = "gpt-4-0125-preview"
 
-    if "dmessages" not in st.session_state:
-        st.session_state.dmessages = [{"role": "system", "content": "You are a virtual due diligence expert for LG (the korean company) with a focus on sustainability. Your task is to gather detailed information about users' new business ideas without revealing the structure or sections of the report. Engage users in a conversational manner, asking one question at a time to ensure clarity. Keep your questions short and to the point. Start by asking them to describe their business opportunity and their rationale on why the company should invest in their business idea. Continue the conversation to gather information on assumptions and risks, project overview, market opportunity, strategic alignment, competitive landscape, available resources, technical and business execution feasibility, and the main investment thesis."}]
+    if "ldmessages" not in st.session_state:
+        st.session_state.ldmessages = [{"role": "system", "content": "You are a virtual due diligence expert for LG (the korean company) with a focus on sustainability. Your task is to gather detailed information about users' new business ideas without revealing the structure or sections of the report. Engage users in a conversational manner, asking one question at a time to ensure clarity. Keep your questions short and to the point. Start by asking them to describe their business opportunity and their rationale on why the company should invest in their business idea. Continue the conversation to gather information on assumptions and risks, project overview, market opportunity, strategic alignment, competitive landscape, available resources, technical and business execution feasibility, and the main investment thesis."}]
     
-    for message in st.session_state.dmessages:
+    for message in st.session_state.ldmessages:
         if message["role"] != "system" and message["content"] != REPORT_PROMPT:
             with st.chat_message(message["role"]):
                 st.markdown(message["content"])
     
-    if len(st.session_state.dmessages) >= 19:
+    if len(st.session_state.ldmessages) >= 19:
         st.toast('You can now generate the due diligence report.')
         if st.button("Generate Report"):
-            st.session_state.dmessages.append({"role": "user", "content": REPORT_PROMPT})
+            st.session_state.ldmessages.append({"role": "user", "content": REPORT_PROMPT})
             with st.chat_message("assistant"):
                 stream = client.chat.completions.create(
                     model=st.session_state["openai_model"],
                     messages=[
                         {"role": m["role"], "content": m["content"]}
-                        for m in st.session_state.dmessages
+                        for m in st.session_state.ldmessages
                     ],
                     stream=True,
                 )
                 response = st.write_stream(stream)
-            st.session_state.dmessages.append({"role": "assistant", "content": response})
+            st.session_state.ldmessages.append({"role": "assistant", "content": response})
 
     if prompt := st.chat_input("What is up?"):
-        st.session_state.dmessages.append({"role": "user", "content": prompt})
+        st.session_state.ldmessages.append({"role": "user", "content": prompt})
         with st.chat_message("user"):
             st.markdown(prompt)
 
@@ -258,9 +258,9 @@ elif app_mode == "Due Diligence LG":
                 model=st.session_state["openai_model"],
                 messages=[
                     {"role": m["role"], "content": m["content"]}
-                    for m in st.session_state.dmessages
+                    for m in st.session_state.ldmessages
                 ],
                 stream=True,
             )
             response = st.write_stream(stream)
-        st.session_state.dmessages.append({"role": "assistant", "content": response})
+        st.session_state.ldmessages.append({"role": "assistant", "content": response})
