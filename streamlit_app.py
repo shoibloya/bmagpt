@@ -12,6 +12,7 @@ import tempfile
 
 # Initialize the OpenAI client with your API keys
 client = OA(api_key=st.secrets['apiKey'])  # Replace with your actual API key
+st.set_page_config(page_title="Nuggt Dashboard")
 
 # Function to simulate bot response, considering both images and text
 def get_bot_response():
@@ -89,102 +90,40 @@ def generate_report(client, conversation):
 
 
 # Sidebar navigation
-app_mode = st.sidebar.selectbox('Choose the app mode', ['Chat', 'PDF', 'Due Diligence Meta', 'Due Diligence LG'])
+app_mode = st.sidebar.selectbox('Choose the app mode', ['Due Diligence'])
 
-if app_mode == "Chat":
-    # Main app layout
-    st.title("GPT4 Vision")
+import streamlit as st
 
-    # Inject custom CSS with st.markdown to make a custom container sticky
-    st.markdown("""
-        <style>
-        .sticky-container {
-            position: -webkit-sticky; /* For Safari */
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            background-color: white;
-        }
-        </style>
-        """, unsafe_allow_html=True)
+if app_mode == "Due Diligence":
 
-    # Create a sticky container for the file uploader
-    with st.container():
-        st.markdown('<div class="sticky-container">', unsafe_allow_html=True)
-        user_input = st.file_uploader("Upload an image", type=['jpg', 'jpeg', 'png'])
-        st.markdown('</div>', unsafe_allow_html=True)
+    REPORT_PROMPT = "Create the due diligence report. In your report include the following sections\nReport: The information you have gathered from the user in string format. Present it with the relevant subsections.\nFeedback: Feedback to the team based on the information you gathered in string format.\nFinal Decision: Your final decision on whether this is a feasible idea worth the investment in string format."
+    st.title("Due Diligence")
+    
+    # Define a list of companies for selection.
+    company_list = ['Greenfield', 'Google', 'Apple', 'Meta', 'Amazon', 'Microsoft']
 
-    # Initialize session state for messages if not already set
-    if 'messages' not in st.session_state:
-        st.session_state['messages'] = []
-
-    # Chat interface
-    for message in st.session_state['messages']:
-        if 'is_photo' in message and message['is_photo']:
-            pass
-            #with st.chat_message(message['role']):
-            #    st.image(message['content'])  # Adjust width as needed
-        else:
-            with st.chat_message(message['role']):
-                st.write(message['content'])
-
-    # Check if a file is uploaded
-    if user_input is not None:
-        # Convert the uploaded file to a PIL Image
-        pil_image = Image.open(user_input)
-        # Add photo to messages as an item
-        st.session_state['messages'].append({'role': 'user', 'content': pil_image, 'is_photo': True})
-        
-    # Text input for questions
-    text_input = st.chat_input("Type your message...", key="chat_input")
-    if text_input:
-        # Add user message to chat
-        st.session_state['messages'].append({'role': 'user', 'content': text_input})
-        with st.chat_message(st.session_state['messages'][-1]['role']):
-            st.markdown(st.session_state['messages'][-1]['content'])  # Adjust width as needed
-        # Trigger bot response
-        get_bot_response()
-
-elif app_mode == "PDF":
-    st.title('PDF QnA')
-
-    # File upload
-    uploaded_file = st.file_uploader('Upload an article', type='pdf')
-    # Query text
-    query_text = st.text_input('Enter your question:', placeholder = 'Please provide a short summary.', disabled=not uploaded_file)
-
-    # Form input and query
-    result = []
-    with st.form('myform', clear_on_submit=True):
-        openai_api_key = st.secrets['apiKey']
-        submitted = st.form_submit_button('Submit', disabled=not(uploaded_file and query_text))
-        if submitted and openai_api_key.startswith('sk-'):
-            with st.spinner('Calculating...'):
-                response = generate_response(uploaded_file, openai_api_key, query_text)
-                result.append(response)
-                del openai_api_key
-
-    if len(result):
-        st.info(response)
-
-elif app_mode == "Due Diligence Meta":
-
-    REPORT_PROMPT = """Create the detailed due diligence report. In your report include the following sections\nExecutive Summary: Describe the project, the progress and actions to be taken; Provide context\nKey due diligence results including but not limited to: Opportunity analysis – including growth potential and market needs, Strategic alignment, Competitive analysis, Feasibility to execution (Team, Unit economics, Business model etc.)\nInvestment Rationale: Investment thesis, Key enablers, assumptions that allow realization of the thesis, Risks and uncertainties\nFinancial and Quantitative Analysis: Financial performance and Financial projections summary (Incl. scenario analysis), Quantitative modelling (summary and direction), Resource allocation Ownership structure upon successful execution\nFeedback: Feedback to the team based on the information you gathered in string format.\nFinal Decision: Your final decision on whether this is a feasible idea worth the investment in string format."""
-    st.title("Due Diligence Meta")
+    # Capture the selected company each time the user selects from the dropdown.
+    selected_company = st.selectbox("Which company do you want the bot to represent?", company_list)    
 
     if "openai_model" not in st.session_state:
         st.session_state["openai_model"] = "gpt-4-0125-preview"
 
     if "dmessages" not in st.session_state:
-        st.session_state.dmessages = [{"role": "system", "content": "You are a virtual due diligence expert for Meta previously known as facebook. Your task is to gather detailed information about users' new business ideas without revealing the structure or sections of the report. Engage users in a conversational manner, asking one question at a time to ensure clarity. Keep your questions short and to the point. Start by asking them to describe their business opportunity and their rationale on why the company should invest in their business idea. Continue the conversation to gather information on assumptions and risks, project overview, market opportunity, strategic alignment, competitive landscape, available resources, proposed ownership structure, technical and business execution feasibility, financial projections and the main investment thesis."}]
+        st.session_state.dmessages = [{"role": "system", "content": f"You are a virtual due diligence expert for Greenfield innovation projects. Your task is to gather detailed information about users' new business ideas without revealing the structure or sections of the report. Engage users in a conversational manner, asking one question at a time to ensure clarity. Keep your questions short and to the point. Start by asking them to describe their business opportunity and their rationale on why the due diligence team should invest in their business idea. Continue the conversation to gather information on key due diligence findings, assumptions and risks, project overview, market opportunity, strategic alignment, competitive landscape, available resources, technical and business execution feasibility, and the main investment thesis."}]
     
     for message in st.session_state.dmessages:
         if message["role"] != "system" and message["content"] != REPORT_PROMPT:
             with st.chat_message(message["role"]):
                 st.markdown(message["content"])
+        elif message["role"] == "system" and message["content"] != REPORT_PROMPT:
+            if selected_company != "Greenfield":
+                message["content"] = f"You are a virtual due diligence expert for {selected_company}. Your task is to gather detailed information about users' new business ideas without revealing the structure or sections of the report. Engage users in a conversational manner, asking one question at a time to ensure clarity. Keep your questions short and to the point. Start by asking them to describe their business opportunity and their rationale on why the company should invest in their business idea. Continue the conversation to gather information on key due diligence findings, assumptions and risks, project overview, market opportunity, strategic alignment, competitive landscape, available resources, technical and business execution feasibility, and the main investment thesis."
+            else:
+                message["content"] = f"You are a virtual due diligence expert for Greenfield innovation projects. Your task is to gather detailed information about users' new business ideas without revealing the structure or sections of the report. Engage users in a conversational manner, asking one question at a time to ensure clarity. Keep your questions short and to the point. Start by asking them to describe their business opportunity and their rationale on why the due diligence team should invest in their business idea. Continue the conversation to gather information on key due diligence findings, assumptions and risks, project overview, market opportunity, strategic alignment, competitive landscape, available resources, technical and business execution feasibility, and the main investment thesis."
+
     
-    if len(st.session_state.dmessages) >= 17:
-        st.toast('You can now generate the due diligence report.')
+    if len(st.session_state.dmessages) >= 9:
+        st.info("You can now generate the due diligence report.")
         if st.button("Generate Report"):
             st.session_state.dmessages.append({"role": "user", "content": REPORT_PROMPT})
             with st.chat_message("assistant"):
@@ -198,8 +137,11 @@ elif app_mode == "Due Diligence Meta":
                 )
                 response = st.write_stream(stream)
             st.session_state.dmessages.append({"role": "assistant", "content": response})
+    
+    elif len(st.session_state.dmessages) != 1:
+        st.info(f"I will ask {int((9-len(st.session_state.dmessages))/2)} more questions before generating the report.")
 
-    if prompt := st.chat_input("What is up?"):
+    if prompt := st.chat_input("Write your message..."):
         st.session_state.dmessages.append({"role": "user", "content": prompt})
         with st.chat_message("user"):
             st.markdown(prompt)
@@ -216,51 +158,3 @@ elif app_mode == "Due Diligence Meta":
             response = st.write_stream(stream)
         st.session_state.dmessages.append({"role": "assistant", "content": response})
 
-elif app_mode == "Due Diligence LG":
-
-    REPORT_PROMPT = "Create the detailed due diligence report. In your report include the following sections\nReport: The information you have gathered from the user in string format. Present it with the relevant subsections. Also, include a section on how the idea can be improved or additional points of consideration.\nFeedback: Feedback to the team based on the information you gathered in string format.\nFinal Decision: Your final decision on whether this is a feasible idea worth the investment in string format."
-    st.title("Due Diligence LG")
-
-    if "openai_model" not in st.session_state:
-        st.session_state["openai_model"] = "gpt-4-0125-preview"
-
-    if "ldmessages" not in st.session_state:
-        st.session_state.ldmessages = [{"role": "system", "content": "You are a virtual due diligence expert for LG (the korean company) with a focus on sustainability. Your task is to gather detailed information about users' new business ideas without revealing the structure or sections of the report. Engage users in a conversational manner, asking one question at a time to ensure clarity. Keep your questions short and to the point. Start by asking them to describe their business opportunity and their rationale on why the company should invest in their business idea. Continue the conversation to gather information on assumptions and risks, project overview, market opportunity, strategic alignment, competitive landscape, available resources, technical and business execution feasibility, and the main investment thesis."}]
-    
-    for message in st.session_state.ldmessages:
-        if message["role"] != "system" and message["content"] != REPORT_PROMPT:
-            with st.chat_message(message["role"]):
-                st.markdown(message["content"])
-    
-    if len(st.session_state.ldmessages) >= 17:
-        st.toast('You can now generate the due diligence report.')
-        if st.button("Generate Report"):
-            st.session_state.ldmessages.append({"role": "user", "content": REPORT_PROMPT})
-            with st.chat_message("assistant"):
-                stream = client.chat.completions.create(
-                    model=st.session_state["openai_model"],
-                    messages=[
-                        {"role": m["role"], "content": m["content"]}
-                        for m in st.session_state.ldmessages
-                    ],
-                    stream=True,
-                )
-                response = st.write_stream(stream)
-            st.session_state.ldmessages.append({"role": "assistant", "content": response})
-
-    if prompt := st.chat_input("What is up?"):
-        st.session_state.ldmessages.append({"role": "user", "content": prompt})
-        with st.chat_message("user"):
-            st.markdown(prompt)
-
-        with st.chat_message("assistant"):
-            stream = client.chat.completions.create(
-                model=st.session_state["openai_model"],
-                messages=[
-                    {"role": m["role"], "content": m["content"]}
-                    for m in st.session_state.ldmessages
-                ],
-                stream=True,
-            )
-            response = st.write_stream(stream)
-        st.session_state.ldmessages.append({"role": "assistant", "content": response})
