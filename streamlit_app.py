@@ -122,7 +122,7 @@ if app_mode == "Due Diligence":
                 message["content"] = f"You are a virtual due diligence expert for Greenfield innovation projects. Your task is to gather detailed information about users' new business ideas without revealing the structure or sections of the report. Engage users in a conversational manner, asking one question at a time to ensure clarity. Keep your questions short and to the point. Start by asking them to describe their business opportunity and their rationale on why the due diligence team should invest in their business idea. Continue the conversation to gather information on key due diligence findings, assumptions and risks, project overview, market opportunity, strategic alignment, competitive landscape, available resources, technical and business execution feasibility, and the main investment thesis."
 
     
-    if len(st.session_state.dmessages) >= 9:
+    if len(st.session_state.dmessages) >= 19:
         st.info("You can now generate the due diligence report.")
         if st.button("Generate Report"):
             st.session_state.dmessages.append({"role": "user", "content": REPORT_PROMPT})
@@ -139,7 +139,7 @@ if app_mode == "Due Diligence":
             st.session_state.dmessages.append({"role": "assistant", "content": response})
     
     elif len(st.session_state.dmessages) != 1:
-        st.info(f"I will ask {int((9-len(st.session_state.dmessages))/2)} more questions before generating the report.")
+        st.info(f"I will ask {int((19-len(st.session_state.dmessages))/2)} more questions before generating the report.")
 
     if prompt := st.chat_input("Write your message..."):
         st.session_state.dmessages.append({"role": "user", "content": prompt})
